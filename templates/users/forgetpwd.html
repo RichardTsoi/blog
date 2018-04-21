@@ -1,0 +1,27 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>忘记密码</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/useroperation.css' %}"/>
+</head>
+<body>
+    <div id="login">
+        <h1>忘记密码</h1>
+        <form action="{% url 'users:forget_pwd' %}" method="post">
+            {% csrf_token %}
+            <input type="text" placeholder="请填写注册时使用的邮箱" name="email">
+            {{ form.email.errors }}
+            {% if msg %}
+                {{ msg }}
+            {% endif %}
+            <input class="btn btn-green" type="submit" value="发送邮件" />
+            <ul class="form-choice">
+                <li class="item">已有账号？<a href="{% url 'users:login' %}">[立即登录]</a></li>
+                <li class="item"><a href="{% url 'blog:index' %}">返回首页</a></li>
+            </ul>
+        </form>
+    </div>
+</body>
+</html>

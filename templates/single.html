@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}{{ article.title }} -Richard Tsoi的博客{% endblock %}
+{% block main %}
+<main class="col-md-8">
+    <article class="post post-{{ article.id }}">
+        <header class="entry-header">
+            <h1 class="entry-title">{{ article.title }}</h1>
+            <div class="entry-meta">
+                <span class="post-category"><a href="#">{{ article.category }}</a></span>
+                <span class="post-date"><a><time class="entry-date"
+                                                          datetime="{{ article.add_time }}">{{ article.add_time }}</time></a></span>
+                <span class="post-author"><a>{{ article.author }}</a></span>
+                <span class="comments-link"><a>{{ article.usercomment_set.count|add:article.replycomment_set.count }} 评论</a></span>
+                <span class="views-count"><a>{{ article.click_numbers }} 阅读</a></span>
+                <span class="likes-count"><a id="like-num">{{ article.like_numbers }} 点赞</a></span>
+            </div>
+        </header>
+        <div class="entry-content clearfix">
+            {{ article.content|safe }}
+        </div>
+        <hr>
+        {% if has_like %}
+            <p id ="cs" class="cs">&#10084;</p>
+        {% else %}
+            <p id="like" class="like">&#10084;</p>
+            <input id="likeBtn" type="button" value="点赞" onclick="add_like($(this), {{ article.id }})">
+        {% endif %}
+    </article>
+    <section class="comment-area" id="comment-area">
+        <hr>
+        <h3>发表评论</h3>
+        {% if request.user.is_authenticated %}
+            <form action="{% url 'operation:user_comment' article.id %}" method="post" class="comment-form">
+            {% csrf_token %}
+            <div class="row">
+{#                <div class="col-md-4">#}
+{#                    <label for="id_name">名字：</label>#}
+{#                    <input type="text" id="id_name" name="name" required>#}
+{#                </div>#}
+{#                <div class="col-md-4">#}
+{#                    <label for="id_email">邮箱：</label>#}
+{#                    <input type="email" id="id_email" name="email" required>#}
+{#                </div>#}
+{#                <div class="col-md-4">#}
+{#                    <label for="id_url">网址：</label>#}
+{#                    <input type="text" id="id_url" name="url">#}
+{#                </div>#}
+                <div class="col-md-12">
+                    <label for="id_comment">评论：</label>
+                    {{ form.comment }}
+                    {{ form.comment.errors }}
+                    <button type="submit" class="comment-btn">发表</button>
+                </div>
+            </div>    <!-- row -->
+        </form>
+        {% else %}
+            <section class="comment-form">
+                <div class="login-form">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span><a href="{% url 'users:login' %}?next={{ request.path }}">登录</a>后评论</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+        <div class="comment-list-panel">
+            <h3>评论列表，共 <span>{{ article.usercomment_set.count|add:article.replycomment_set.count }}</span> 条评论</h3>
+            <ul class="comment-list list-unstyled">
+                {% for user_comment in comment_list %}
+                    <li class="comment-item">
+                        <span class="image"><img src="/static/img/default.jpg"></span>
+                        <span class="nickname">{{ user_comment.user.name }}</span>
+                        <time class="submit-date" datetime="{{ user_comment.add_time }}">{{ user_comment.add_time }}</time>
+                        <span class="reply"><a href="{% url 'operation:reply_comment' article.id  user_comment.id %}">回复</a></span>
+                        <div class="text">
+                            {{ user_comment.comment|safe }}
+                        </div>
+                        <hr/>
+                        <ul class="reply-comment-list">
+                            {% for reply_comment in user_comment.replycomment_set.all %}
+                            <li class="reply-comment-item">
+                                <span class="nickname">{{ reply_comment.user.name }} @ {{ reply_comment.to_user.name }}</span>
+                                <time class="submit-date" datetime="{{ reply_comment.add_time }}">{{ reply_comment.add_time }}</time>
+{#                                <span class="reply"><a href="{% url 'operation:reply_comment' article.id  reply_comment.id %}">回复</a></span>#}
+                                <div class="text">
+                                    {{ reply_comment.text|safe }}
+                                </div>
+                            </li>
+                            <hr />
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% empty %}
+                    暂无评论
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+</main>
+{% endblock main %}
+
+{% block toc %}
+<div class="widget widget-content">
+    <h3 class="widget-title">文章目录</h3>
+    <ul>
+        {{ title_tree|safe }}
+    </ul>
+</div>
+{% endblock toc %}
+
+{% block custom_js %}
+{#通过ajax实现文章点赞功能#}
+<script type="text/javascript">
+function add_like(current_element, article_id){
+    $.ajax({
+        cache: false,
+        type: "POST",
+        url: "{% url 'blog:add_fav' %}",
+        data: {'article_id': article_id},
+        beforeSend:function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        },
+        success:function(data){
+            if(data.status === 'fail'){
+                if(data.msg === '用户未登录'){
+                    window.location.href="{% url 'users:login' %}";
+                }else{
+                    alert(data.msg);
+                }
+            }else if(data.status === 'success'){
+                var like_element = document.getElementById("like");
+                like_element.className = 'cs';
+                var btn_element = document.getElementById("likeBtn");
+                btn_element.style.display = "none";
+                var like_num = document.getElementById("like-num");
+                like_num.innerHTML = "{{ article.like_numbers }}";
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

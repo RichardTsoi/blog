@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block main %}
+<main class="col-md-8">
+    {% if error_msg %}
+        <p>{{ error_msg }}</p>
+    {% endif %}
+    {% for article in article_list.object_list %}
+        <article class="post post-{{ forloop.counter }}">
+        <header class="entry-header">
+            <h1 class="entry-title">
+                <a href="{% url 'blog:detail' article.id %}">{{ article.title }}</a>
+            </h1>
+            <div class="entry-meta">
+                <span class="post-category"><a href="{% url 'blog:category' article.category.id %}">{{ article.category }}</a></span>
+                <span class="post-date"><a><time class="entry-date"
+                                                          datetime="{{ article.add_time }}">{{ article.add_time }}</time></a></span>
+                <span class="post-author"><a>{{ article.author }}</a></span>
+                <span class="comments-link"><a>{{ article.usercomment_set.count|add:article.replycomment_set.count }} 评论</a></span>
+                <span class="views-count"><a>{{ article.click_numbers }} 阅读</a></span>
+                <span class="likes-count"><a>{{ article.like_numbers }} 点赞</a></span>
+            </div>
+        </header>
+        <div class="entry-content clearfix">
+            <p>{{ article.excerpt }}</p>
+            <div class="read-more cl-effect-14">
+                <a href="{% url 'blog:detail' article.id %}" class="more-link">继续阅读 <span class="meta-nav">→</span></a>
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    暂无文章
+    {% endfor %}
+    <!-- 简单分页效果
+    <div class="pagination-simple">
+        <a href="#">上一页</a>
+        <span class="current">第 6 页 / 共 11 页</span>
+        <a href="#">下一页</a>
+    </div>
+    -->
+{#    <div class="pagination">#}
+{#        <ul>#}
+{#            <li><a href="">1</a></li>#}
+{#            <li><a href="">...</a></li>#}
+{#            <li><a href="">4</a></li>#}
+{#            <li><a href="">5</a></li>#}
+{#            <li class="current"><a href="">6</a></li>#}
+{#            <li><a href="">7</a></li>#}
+{#            <li><a href="">8</a></li>#}
+{#            <li><a href="">...</a></li>#}
+{#            <li><a href="">11</a></li>#}
+{#        </ul>#}
+{#    </div>#}
+    <div class="pagination">
+    {% if article_list.has_previous %}
+        <a href="?{{ article_list.previous_page_number.querystring }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a>
+    {% else %}
+        <span class="disabled prev">&lsaquo;&lsaquo; {% trans "previous" %}</span>
+    {% endif %}
+    {% for page in article_list.pages %}
+        {% if page %}
+            {% ifequal page article_list.number %}
+                <span class="current page">{{ page }}</span>
+            {% else %}
+                <a href="?{{ page.querystring }}" class="page">{{ page }}</a>
+            {% endifequal %}
+        {% else %}
+            ...
+        {% endif %}
+    {% endfor %}
+    {% if article_list.has_next %}
+        <a href="?{{ article_list.next_page_number.querystring }}" class="next">{% trans "next" %} &rsaquo;&rsaquo;</a>
+    {% else %}
+        <span class="disabled next">{% trans "next" %} &rsaquo;&rsaquo;</span>
+    {% endif %}
+    </div>
+</main>
+{% endblock main %}

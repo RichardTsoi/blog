@@ -1,0 +1,25 @@
+{% extends 'extra_base.html' %}
+{% load staticfiles %}
+
+{% block title %}联系我 -Richard Tsoi的博客{% endblock %}
+{% block content %}
+<main class="col-md-12">
+    <h1 class="page-title">联系我</h1>
+    <article class="post">
+        <div class="entry-content clearfix">
+            <form action="{% url 'blog:contact' %}" method="post" class="contact-form">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                        <input type="text" name="name" placeholder="名字" required>
+                        <input type="email" name="email" placeholder="邮箱" required>
+                        <input type="text" name="subject" placeholder="主题" required>
+                        <textarea name="message" rows="7" placeholder="留言" required></textarea>
+                        <button class="btn-send btn-5 btn-5b ion-ios-paperplane"><span>发送</span></button>
+                    </div>
+                </div>	<!-- row -->
+            </form>
+        </div>
+    </article>
+</main>
+{% endblock content %}
