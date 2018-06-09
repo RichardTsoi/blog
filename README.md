@@ -10,4 +10,4 @@
 
 在cmd命令行输入 python manage.py runserver 启动项目
 
-打开浏览器，输入localhost:8000即可在本地浏览项目
+打开浏览器，输入localhost:8000即可在本地访问博客
