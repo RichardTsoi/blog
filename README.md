@@ -24,6 +24,10 @@ DATABASES = {
 
 使用数据库创建一个utf8字符集数据库名为‘myblog’
 
-在cmd命令行输入 python manage.py runserver 启动项目
+在cmd命令行输入python manage.py createsuperuser创建超级管理员账号，邮箱可以随意填写，输入密码时是不会显示的
+
+创建完超级管理员账号后输入 python manage.py runserver 启动项目
 
 打开浏览器，输入localhost:8000即可在本地访问博客
+
+访问localhost:8000/admin使用刚刚创建的超级管理员账号登入后台，即可添加文章
